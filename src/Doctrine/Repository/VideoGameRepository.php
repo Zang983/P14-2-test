@@ -1,16 +1,12 @@
 <?php
-
 declare(strict_types=1);
-
 namespace App\Doctrine\Repository;
-
 use App\List\VideoGameList\Filter;
 use App\List\VideoGameList\Pagination;
 use App\Model\Entity\VideoGame;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
-
 /**
  * @extends ServiceEntityRepository<VideoGame>
  */
@@ -20,7 +16,6 @@ final class VideoGameRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, VideoGame::class);
     }
-
     /**
      * @return Paginator<VideoGame>
      */
@@ -30,12 +25,16 @@ final class VideoGameRepository extends ServiceEntityRepository
             ->addSelect('t')
             ->leftJoin('vg.tags', 't')
             ->setFirstResult($pagination->getOffset())
-            ->setMaxResults($pagination->getLimit())
-            ->orderBy(
+            ->setMaxResults($pagination->getLimit());
+        if ($pagination->getSorting()->name === 'Title') {
+            // Utilisation d'une fonction personnalisée pour le tri naturel
+            $queryBuilder->orderBy('LENGTH(vg.title), vg.title', $pagination->getDirection()->getSql());
+        } else {
+            $queryBuilder->orderBy(
                 $pagination->getSorting()->getSql(),
                 $pagination->getDirection()->getSql()
             );
-
+        }
         if ($filter->getSearch() !== null) {
             $queryBuilder
                 ->andWhere(
@@ -47,7 +46,6 @@ final class VideoGameRepository extends ServiceEntityRepository
                 )
                 ->setParameter('search', '%' . $filter->getSearch() . '%');
         }
-
         if ([] !== $filter->getTags()) {
             // Utilisez une sous-requête pour filtrer les jeux ayant tous les tags requis
             $subQuery = $this->getEntityManager()->createQueryBuilder()
@@ -57,13 +55,11 @@ final class VideoGameRepository extends ServiceEntityRepository
                 ->where('t2.id IN (:tags)')
                 ->groupBy('vg2.id')
                 ->having('COUNT(DISTINCT t2.id) = :tagCount');
-
             $queryBuilder
                 ->andWhere($queryBuilder->expr()->in('vg.id', $subQuery->getDQL()))
                 ->setParameter('tags', $filter->getTags())
                 ->setParameter('tagCount', count($filter->getTags()));
         }
-
         return new Paginator($queryBuilder, fetchJoinCollection: true);
     }
 }
