@@ -28,7 +28,8 @@ final class VideoGameRepository extends ServiceEntityRepository
             ->setMaxResults($pagination->getLimit());
         if ($pagination->getSorting()->name === 'Title') {
             // Utilisation d'une fonction personnalisée pour le tri naturel
-            $queryBuilder->orderBy('LENGTH(vg.title), vg.title', $pagination->getDirection()->getSql());
+//            $queryBuilder->orderBy('LENGTH(vg.title), vg.title', $pagination->getDirection()->getSql());
+            $queryBuilder->orderBy('CAST(SUBSTRING(vg.title, LOCATE(" ", vg.title) + 1) AS UNSIGNED)', $pagination->getDirection()->getSql());
         } else {
             $queryBuilder->orderBy(
                 $pagination->getSorting()->getSql(),
