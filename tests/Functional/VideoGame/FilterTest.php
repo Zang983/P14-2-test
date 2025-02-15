@@ -101,7 +101,7 @@ final class FilterTest extends FunctionalTestCase
                 FilterTest::createQueryParams(1, [
                     'tags' => [-1]
                 ]),
-                'Affiche 10 jeux vidéo de 1 à 10 sur les 500 jeux vidéo',
+                'Affiche 10 jeux vidéo de 1 à 10 sur les 50 jeux vidéo',
                 ['Jeu vidéo 0', 'Jeu vidéo 1', 'Jeu vidéo 2', 'Jeu vidéo 3', 'Jeu vidéo 4', 'Jeu vidéo 5', 'Jeu vidéo 6', 'Jeu vidéo 7', 'Jeu vidéo 8', 'Jeu vidéo 9']
             ],
         ];
